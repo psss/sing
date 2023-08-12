@@ -1,0 +1,201 @@
+%\magnification 1414
+
+% obsah
+\newwrite\file
+\immediate\openout\file=\jobname.obs
+
+% nastavime hezke fonty
+\font\f   csssq8 at 16pt         % hlavni font
+\font\ff  csssbx17 at 30pt       % nadpisy pisnicek
+\font\fff csssbx17 at 4cm        % titulek
+\font\i   csssqi8 at 16pt        % italika (recitativy...)
+\font\b   csssbx17 at 17pt       % bold
+\font\fr  csssbx17 at 22pt       % refrenove eRko
+\font\fii csssq8                 % malinkaty pidifontik
+\font\fin csssq8 at 14pt         % indexovy
+\font\fak csssq8 at 12pt         % akordovy
+
+% figl na psani akordu
+\def\/{/}
+\catcode`\/=13
+\def/#1 {\leavevmode\raise 14pt\rlap{#1\vrule width0pt height13pt}}
+%\def\lomeno{{\catcode`\/=11 /}}
+
+% kdovi, jestli kdy pouzivane indexy akordu
+\def\_#1{\hskip -1pt \lower 0pt \hbox{\fak#1}}
+\def\^#1{\hskip -1pt \raise +3pt \hbox{\fak#1}}
+\def\6{\^6}
+\def\7{\^7}
+\def\9{\^9}
+\def\dim{\^{dim}}
+
+% srdicko
+\def\heart{$^\heartsuit$} 
+%\def\is{$\sharp$}
+%\def\es{$\flat$}
+
+% radkovani a odsazeni
+\baselineskip 17pt plus 3pt minus 2pt
+\parindent 0pt
+
+% mezery mezi slokami
+\def\s{\vskip 10pt plus 5pt minus 5pt\penalty -1000}
+\def\S{\vskip 14pt plus 5pt minus 5pt\penalty -1000}
+
+% podminena mezirka
+\def\smozna{\ifdim\lastskip=0pt\s\fi}
+\def\nic{\quad}
+
+% precnivajici radky
+%\def\rest#1{\hfill\break\leavevmode\ \hfill#1\vskip-\baselineskip}
+\def\rest#1{\hfill%
+        \hbox to 0pt{%
+                \vbox to 0pt{\leavevmode\lower\baselineskip%
+                        \hbox to 0pt{\hss #1}\vss
+                }
+        \hss}
+}
+
+% refrenitka
+\def\[{[:}
+\def\]{:]}
+\def\erko{\hbox to 23pt{\fr r:\hfil}}
+\def\r#1...{\smozna\noindent\erko #1...\s\edef\last{#1}}
+\def\rr{\r{\last}...}
+\def\R#1*#2*{\smozna{\parindent 23pt\noindent\erko #1#2\S}\edef\last{#1}}
+\def\krat#1{\hfill (#1x) \hfill\ }
+\def\pozn#1{\hfill (#1) \hfill\ }
+
+% autori v paticce
+\def\authors{}
+
+% nadpisy pisnicek
+\def\sng#1#2{{\ff
+        \ifodd\pageno                           % prave stranky
+                \hfill
+                \hbox to 15cm{\vbox{
+                                \leftskip0pt plus 1fill
+                \hsize15cm #1%
+                \vrule width 0pt depth 10pt height 21pt
+                }}
+                \vskip-29pt
+                #2\hrulefill
+        \else                           % leve stranky
+                \hbox to 15cm{\vbox{
+                \rightskip 0pt plus 1fill
+                \hsize15cm #1%
+                \vrule width 0pt depth 10pt height 21pt
+                }}
+                \vskip-29pt
+                \leavevmode\hrulefill#2
+        \fi}
+        \bigskip
+}
+
+% at tam ci onam -- na konci je treba...
+\def\no#1.{\ \hbox to 50pt{\hfill#1.}}
+\def\aftersong#1#2{
+        \immediate\write\file{\string\no\the\songno. #1 \string\dotfill\ \the\pageno\par}
+        %\immediate\write\file{#1 \string\dotfill\ \the\songno\par}
+        \advance\songno by 1
+        \def\lastsong{#1}
+        \def\lastauthors{#2}
+}
+
+% normalni song
+\def\song#1#2{
+        \vfill\eject
+        \sng{#1}{\the\songno}
+        \aftersong{#1}{#2}
+        \def\authors{#2}
+}
+
+% na stejne strance pokracovaci song
+\def\Song#1#2{
+        \vskip1cm\vfill\sng{#1}{\the\songno}
+        \aftersong{#1}{#2}
+        \edef\authors{\authors\hskip0pt plus .3fill #2}
+}
+
+% pisnicka na dve stranky (jen leva-prava, naopak rve)
+\def\songgg{
+        {\hfill \ff ...\hfill}
+        \vfill\eject
+        \ifodd\pageno
+                \sng{\lastsong}{\vrule width 0pt height 21pt...\ }
+        \else
+                \sng{\lastsong}{\vrule width 0pt height 21pt\ ...}
+                \moveright 10cm \vbox to 0pt{\vss{\fff hej!}}
+        \fi
+        \def\authors{\lastauthors}
+}
+
+% nastaveni stranky
+\voffset -0.8cm
+\hoffset -1.5cm
+\vsize  26.5cm
+\hsize 18cm
+
+\nopagenumbers
+
+% pocitadlo pisnicek
+\newcount \songno
+\songno 1
+
+% prvni strana -- nadpis
+\def\zacatek#1#2{
+{ \leftskip 0pt plus 1fill
+
+  \vglue 6cm
+  \fff #1 \vskip 4mm
+  \vrule width 16cm height 7mm \vskip 1.5cm
+  \ff #2
+  \vfill\eject
+}
+
+% nastavime pocitadlo stranek
+\pageno 0
+\ \vfill\eject
+
+% nastavime paticku (a v ni levy/pravy stridajici okraj)
+\f
+\footline{
+\ifodd\pageno \hskip -.5cm\fin\authors\hfill\the\pageno \global\advance\hoffset by 1cm
+\else             \hskip -.5cm\fin\the\pageno\hfill\authors\global\advance\hoffset by -1cm
+\fi}
+
+\obeylines% a jedem na to
+}
+
+% finishujem
+\def\konec#1#2{
+        \vfill\eject
+        \immediate\closeout\file
+
+        \footline{
+        \ifodd\pageno \fin\the\pageno\hfill \global\advance\hoffset by 1cm
+        \else             \hskip -.5cm\hfill\fin\the\pageno \global\advance\hoffset by -1cm
+        \fi}
+
+        \advance\leftskip by 1cm
+        \advance\rightskip by 2cm
+
+        \baselineskip 17pt plus 3pt
+        \voffset 0cm
+        \vsize  25.5cm
+
+        % obsah
+        \vglue 0.5cm
+        \centerline{\fff #1!}
+        \vskip 1cm
+        \input \jobname.obs
+
+        % abecedni obsah
+        \vfill\eject
+        \vglue 0.5cm
+        \centerline{\fff #1!}
+        \bigskip
+        \centerline{\ff (#2)}
+        \vskip 1cm
+        \input \jobname.srt
+}
